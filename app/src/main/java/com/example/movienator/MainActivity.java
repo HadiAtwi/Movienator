@@ -17,6 +17,11 @@ public class MainActivity extends AppCompatActivity {
 
     private MoviesRepository moviesRepository;
 
+    private List<Genre> movieGenres;
+
+    private boolean isFetchingMovies;
+    private int currentPage = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,47 +29,74 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Attach MoviesAdapter to recyclerView
-        moviesList = this.findViewById(R.id.movies_list);
-        moviesList.setLayoutManager(new LinearLayoutManager(this));
-
-        adapter = new MoviesAdapter(new ArrayList<Movie>());
-        moviesList.setAdapter(adapter);
-
-
         moviesRepository = MoviesRepository.getInstance();
+        moviesList = this.findViewById(R.id.movies_list);
 
-        //moviesList = findViewById(R.id.movies_list);
-        //moviesList.setLayoutManager(new LinearLayoutManager(this));
+        setupOnScrollListener();
 
-        moviesRepository.getMovies(new OnGetMoviesCallback() {
+        getGenres();
+
+    }
+
+    private void setupOnScrollListener() {
+        final LinearLayoutManager manager = new LinearLayoutManager(this);
+        moviesList.setLayoutManager(manager);
+        moviesList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onSuccess(List<Movie> movies) {
-                adapter = new MoviesAdapter(movies);
-                moviesList.setAdapter(adapter);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                int totalItemCount = manager.getItemCount();
+                int visibleItemCount = manager.getChildCount();
+                int firstVisibleItem = manager.findFirstVisibleItemPosition();
+
+                if (firstVisibleItem + visibleItemCount >= totalItemCount / 2) {
+                    if (!isFetchingMovies) {
+                        getMovies(currentPage + 1);
+                    }
+                }
+            }
+        });
+    }
+
+    private void getGenres() {
+        moviesRepository.getGenres(new OnGetGenresCallback() {
+            @Override
+            public void onSuccess(List<Genre> genres) {
+                movieGenres = genres;
+                getMovies(currentPage);
             }
 
             @Override
             public void onError() {
-                Toast.makeText(MainActivity.this, "Please check your internet connection.", Toast.LENGTH_SHORT).show();
+                showError();
             }
         });
     }
-}
 
-//public class MainActivity extends AppCompatActivity {
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
-//
-//        // Attach MoviesAdapter to recyclerView
-//        RecyclerView recyclerView = (RecyclerView) this.findViewById(R.id.movies_list);
-//        LinearLayoutManager manager = new LinearLayoutManager(this);
-//        recyclerView.setLayoutManager(manager);
-//        recyclerView.setHasFixedSize(true);
-//        MoviesAdapter adapter = new MoviesAdapter();
-//        recyclerView.setAdapter(adapter);
-//
-//    }
-//}
+
+    private void getMovies(int page) {
+        isFetchingMovies = true;
+        moviesRepository.getMovies(page, new OnGetMoviesCallback() {
+            @Override
+            public void onSuccess(int page, List<Movie> movies) {
+                Log.d("MoviesRepository", "Current Page = " + page);
+                if (adapter == null) {
+                    adapter = new MoviesAdapter(movies, movieGenres);
+                    moviesList.setAdapter(adapter);
+                } else {
+                    adapter.appendMovies(movies);
+                }
+                currentPage = page;
+                isFetchingMovies = false;
+            }
+
+            @Override
+            public void onError() {
+                showError();
+            }
+        });
+    }
+
+    private void showError() {
+        Toast.makeText(MainActivity.this, "Please check your internet connection.", Toast.LENGTH_SHORT).show();
+    }
+}
