@@ -24,11 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Attach MoviesAdapter to recyclerView
-        RecyclerView recyclerView = (RecyclerView) this.findViewById(R.id.movies_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        moviesList = this.findViewById(R.id.movies_list);
+        moviesList.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new MoviesAdapter(new ArrayList<Movie>());
-        recyclerView.setAdapter(adapter);
+        moviesList.setAdapter(adapter);
 
 
         moviesRepository = MoviesRepository.getInstance();
