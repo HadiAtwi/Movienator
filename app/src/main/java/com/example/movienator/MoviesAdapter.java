@@ -1,5 +1,6 @@
 package com.example.movienator;
 
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,7 +11,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +56,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         notifyDataSetChanged();
     }
 
+    public void clearMovies() {
+        movies.clear();
+        notifyDataSetChanged();
+    }
+
     class MovieViewHolder extends RecyclerView.ViewHolder {
         TextView releaseDate;
         TextView title;
@@ -72,13 +82,20 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             releaseDate.setText(movie.getReleaseDate().split("-")[0]);
             title.setText(movie.getTitle());
             rating.setText(String.valueOf(movie.getRating()));
-            Log.d("Movies", movie.getGenreIds().toString());
             genres.setText(getGenres(movie.getGenreIds()));
-            Log.d("Poster", movie.getPosterPath());
+            String url = IMAGE_BASE_URL + movie.getPosterPath();
+            Log.d("Poster", url);
+
             Glide.with(itemView)
                     .load(IMAGE_BASE_URL + movie.getPosterPath())
                     .apply(RequestOptions.placeholderOf(R.color.colorPrimary))
                     .into(poster);
+
+//            Glide.with(itemView.getContext())
+//                    .load(IMAGE_BASE_URL + movie.getPosterPath()).fitCenter()
+//                    .error(R.mipmap.ic_launcher)
+//                    .placeholder(R.color.colorPrimary)
+//                    .into(poster);
         }
 
         private String getGenres(List<Integer> genreIds) {
