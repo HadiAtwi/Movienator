@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         // Attach MoviesAdapter to recyclerView
         moviesRepository = MoviesRepository.getInstance();
@@ -143,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 currentPage = page;
                 isFetchingMovies = false;
+                setTitle();
+
             }
 
             @Override
@@ -150,6 +155,20 @@ public class MainActivity extends AppCompatActivity {
                 showError();
             }
         });
+    }
+
+    private void setTitle() {
+        switch (sortBy) {
+            case MoviesRepository.POPULAR:
+                setTitle(getString(R.string.popular));
+                break;
+            case MoviesRepository.TOP_RATED:
+                setTitle(getString(R.string.top_rated));
+                break;
+            case MoviesRepository.UPCOMING:
+                setTitle(getString(R.string.upcoming));
+                break;
+        }
     }
 
     private void showError() {
