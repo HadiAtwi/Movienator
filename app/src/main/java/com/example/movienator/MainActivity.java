@@ -1,6 +1,9 @@
 package com.example.movienator;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.Preference;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +32,14 @@ public class MainActivity extends AppCompatActivity {
     private boolean isFetchingMovies;
     private int currentPage = 1;
 
+
+    /*_________________ Personalization Data _______________*/
+
+    private static final String PREFERENCES = "personalizedData";
+    SharedPreferences personalizedData ;
+
+    /*______________________________________________________*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +55,11 @@ public class MainActivity extends AppCompatActivity {
         setupOnScrollListener();
 
         getGenres();
+
+        // Initialize & Load preferences
+        personalizedData = getBaseContext().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+
+
 
     }
 
