@@ -1,10 +1,14 @@
 package com.example.movienator;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -15,7 +19,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MovieActivity extends AppCompatActivity {
 
@@ -38,6 +45,19 @@ public class MovieActivity extends AppCompatActivity {
     private MoviesRepository moviesRepository;
     private int movieId;
 
+    /*_________________ Genres List and ID Map _____________*/
+    List<String> currentGenres;
+    Map<String, Integer> genreMap = new HashMap<String, Integer>();
+
+    /*______________________________________________________*/
+
+
+    /*_________________ Personalization Data _______________*/
+    public static final String PREFERENCES = "personalizedData";
+    SharedPreferences personalizedData ;
+    /*______________________________________________________*/
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +72,29 @@ public class MovieActivity extends AppCompatActivity {
         initUI();
 
         getMovie();
+
+        personalizedData = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+
+        genreMap.put("Action", 28);
+        genreMap.put("Adventure", 12);
+        genreMap.put("Animation", 16);
+        genreMap.put("Comedy", 35);
+        genreMap.put("Crime", 80);
+        genreMap.put("Documentary", 99);
+        genreMap.put("Drama", 18);
+        genreMap.put("Family", 10751);
+        genreMap.put("Fantasy", 14);
+        genreMap.put("History", 36);
+        genreMap.put("Horror", 27);
+        genreMap.put("Music", 10402);
+        genreMap.put("Mystery", 9648);
+        genreMap.put("Romance", 10749);
+        genreMap.put("Science Fiction", 878);
+        genreMap.put("TV Movie", 10770);
+        genreMap.put("Thriller", 53);
+        genreMap.put("War", 10752);
+        genreMap.put("Western", 37);
+
     }
 
     private void setupToolbar() {
@@ -107,7 +150,7 @@ public class MovieActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Genre> genres) {
                 if (movie.getGenres() != null) {
-                    List<String> currentGenres = new ArrayList<>();
+                    currentGenres = new ArrayList<>();
                     for (Genre genre : movie.getGenres()) {
                         currentGenres.add(genre.getName());
                     }
@@ -120,6 +163,38 @@ public class MovieActivity extends AppCompatActivity {
                 showError();
             }
         });
+    }
+
+    public void likeMovie(View view){
+
+        // Initialize editor
+        SharedPreferences.Editor preferencesEditor = personalizedData.edit();
+
+        // Check if minimum release date in preferences is less than the current movie's release date
+
+        // Add the current movie's genre to the list of preferred genres
+
+        String genresToAdd = "";
+
+        Iterator<String> iterator = currentGenres.iterator();
+        while(iterator.hasNext()) {
+            String genre = iterator.next();
+            genresToAdd += genreMap.get(genre) + "|";
+        }
+
+        if(personalizedData.contains("genres")){
+            preferencesEditor.putString("genres", personalizedData.getString("genres", "") + genresToAdd.substring(0, genresToAdd.length()-1));
+        }else{
+            preferencesEditor.putString("genres", genresToAdd.substring(0, genresToAdd.length()-1));
+        }
+
+        preferencesEditor.commit();
+
+        Toast.makeText(MovieActivity.this,"Added to likes.", Toast.LENGTH_LONG).show();
+
+        // TODO keep it disabled even after then activity is closed and then reopened
+        Button likeButton = findViewById(R.id.btnLike);
+        likeButton.setEnabled(false);
     }
 
     @Override

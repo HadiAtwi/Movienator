@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     /*_________________ Personalization Data _______________*/
 
-    private static final String PREFERENCES = "personalizedData";
+    public static final String PREFERENCES = "personalizedData";
     SharedPreferences personalizedData ;
 
     /*______________________________________________________*/
@@ -57,8 +57,7 @@ public class MainActivity extends AppCompatActivity {
         getGenres();
 
         // Initialize & Load preferences
-        personalizedData = getBaseContext().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
-
+        personalizedData = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
 
 
     }
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     case R.id.personalized:
                         sortBy = MoviesRepository.PERSONALIZED;
-                        getMovies(currentPage);
+                        getPersonalizedMovies(currentPage);
                     default:
                         return false;
                 }
@@ -153,6 +152,38 @@ public class MainActivity extends AppCompatActivity {
     private void getMovies(int page) {
         isFetchingMovies = true;
         moviesRepository.getMovies(page, sortBy, new OnGetMoviesCallback() {
+            @Override
+            public void onSuccess(int page, List<Movie> movies) {
+                if (adapter == null) {
+                    adapter = new MoviesAdapter(movies, movieGenres, callback);
+                    moviesList.setAdapter(adapter);
+                } else {
+                    if (page == 1) {
+                        adapter.clearMovies();
+                    }
+                    adapter.appendMovies(movies);
+                }
+                currentPage = page;
+                isFetchingMovies = false;
+                setTitle();
+
+            }
+
+            @Override
+            public void onError() {
+                showError();
+            }
+        });
+    }
+
+    private void getPersonalizedMovies(int page) {
+
+        personalizedData = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+
+        Log.d("GENRES", personalizedData.getString("genres", ""));
+
+        isFetchingMovies = true;
+        moviesRepository.getPersonalizedMovies(page, personalizedData.getString("genres", ""), new OnGetMoviesCallback() {
             @Override
             public void onSuccess(int page, List<Movie> movies) {
                 if (adapter == null) {

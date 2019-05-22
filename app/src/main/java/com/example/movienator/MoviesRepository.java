@@ -1,6 +1,8 @@
 package com.example.movienator;
 
+import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -10,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 // MoviesRepository Singleton
 public class MoviesRepository {
-
+    
     private static final String BASE_URL = "https://api.themoviedb.org/3/";
     private static final String LANGUAGE = "en-US";
 
@@ -42,6 +44,7 @@ public class MoviesRepository {
 
 
     public void getMovies(int page, String sortBy, final OnGetMoviesCallback callback) {
+
         Callback<MoviesResponse> call = new Callback<MoviesResponse>() {
             @Override
             public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
@@ -72,16 +75,40 @@ public class MoviesRepository {
                 api.getUpcomingMovies(BuildConfig.API_KEY, LANGUAGE, page)
                         .enqueue(call);
                 break;
-            case PERSONALIZED:
-                api.getPersonalized(BuildConfig.API_KEY, LANGUAGE, "18", page)
-                        .enqueue(call);
-                break;
             case POPULAR:
             default:
                 api.getPopularMovies(BuildConfig.API_KEY, LANGUAGE, page)
                         .enqueue(call);
                 break;
         }
+    }
+
+    public void getPersonalizedMovies(int page, String genres, final OnGetMoviesCallback callback) {
+
+        Callback<MoviesResponse> call = new Callback<MoviesResponse>() {
+            @Override
+            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+                if (response.isSuccessful()) {
+                    MoviesResponse moviesResponse = response.body();
+                    if (moviesResponse != null && moviesResponse.getMovies() != null) {
+                        callback.onSuccess(moviesResponse.getPage(), moviesResponse.getMovies());
+                    } else {
+                        callback.onError();
+                    }
+                } else {
+                    callback.onError();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MoviesResponse> call, Throwable t) {
+                callback.onError();
+            }
+        };
+
+        api.getPersonalized(BuildConfig.API_KEY, LANGUAGE, genres, page)
+                .enqueue(call);
+
     }
 
     public void getGenres(final OnGetGenresCallback callback) {
