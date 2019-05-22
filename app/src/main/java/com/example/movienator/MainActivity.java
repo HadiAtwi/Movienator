@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
                         sortBy = MoviesRepository.UPCOMING;
                         getMovies(currentPage);
                         return true;
+                    case R.id.personalized:
+                        sortBy = MoviesRepository.PERSONALIZED;
+                        getMovies(currentPage);
                     default:
                         return false;
                 }
@@ -178,6 +181,8 @@ public class MainActivity extends AppCompatActivity {
             case MoviesRepository.UPCOMING:
                 setTitle(getString(R.string.upcoming));
                 break;
+            case MoviesRepository.PERSONALIZED:
+                setTitle("Personalized");
         }
     }
 

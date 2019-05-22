@@ -16,4 +16,9 @@
         android:enabled="true"
         android:title="Upcoming"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/personalized"
+        android:enabled="true"
+        android:title="Personalized"
+        app:showAsAction="never" />
 </menu>

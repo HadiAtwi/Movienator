@@ -17,6 +17,7 @@ public class MoviesRepository {
     public static final String POPULAR = "popular";
     public static final String TOP_RATED = "top_rated";
     public static final String UPCOMING = "upcoming";
+    public static final String PERSONALIZED = "personalized";
 
     private static MoviesRepository repository;
 
@@ -69,6 +70,10 @@ public class MoviesRepository {
                 break;
             case UPCOMING:
                 api.getUpcomingMovies(BuildConfig.API_KEY, LANGUAGE, page)
+                        .enqueue(call);
+                break;
+            case PERSONALIZED:
+                api.getPersonalized(BuildConfig.API_KEY, LANGUAGE, "18", page)
                         .enqueue(call);
                 break;
             case POPULAR:
